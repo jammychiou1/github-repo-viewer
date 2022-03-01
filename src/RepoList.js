@@ -1,88 +1,106 @@
-import { useState, useEffect } from 'react';
+import { Fragment } from 'react';
 import { Link } from 'react-router-dom';
+import { useInfiniteQuery } from 'react-query';
+import { InView } from 'react-intersection-observer';
+
 import { fetchRepoList } from './GithubAPIWrapper';
 
-function renderList(username, error, result) {
-  if (error !== '') {
-    return (
-      <div>
-        Error: {error}
-      </div>
-    );
-  }
-  if (result === null) {
+function RepoList(props) {
+  const username = props.username;
+
+  const {
+    data,
+    error,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    status,
+  } = useInfiniteQuery(['repoList', username], fetchRepoList, {
+    getNextPageParam: (lastPage, pages) => {
+      if (lastPage.repos.length !== 10) {
+        return undefined;
+      }
+      return pages.length + 1;
+    },
+  })
+
+  if (status === 'loading') {
     return (
       <div>
         Loading...
       </div>
     );
   }
-  if (result.length === 0) {
+  if (status === 'error') {
     return (
       <div>
-        <i>(Empty)</i>
+        Error: {error.message}
       </div>
     );
   }
 
-  const renderItem = (repo) => (
-    <tr key={repo.name}>
-      <td>
-        <Link to={`/users/${username}/repos/${repo.name}`}>
-          {repo.name}
-        </Link>
-      </td>
-      <td>
-        {repo.stargazers_count}
-      </td>
-    </tr>
-  );
-
-  return (
-    <div>
-      <table>
-        <thead>
-          <tr>
-            <th>Repository</th>
-            <th>Stargazers Count</th>
-          </tr>
-        </thead>
-        <tbody>
-          {result.map(renderItem)}
-        </tbody>
-      </table>
-    </div>
-  );
-}
-
-function RepoList(props) {
-  const username = props.username;
-  const [result, setResult] = useState(null);
-  const [error, setError] = useState('');
-  useEffect(() => {
-    let cancelled = false;
-    const fetchAndUpdate = async () => {
-      const {result: newResult, error: newError} = await fetchRepoList(username);
-      if (!cancelled) {
-        if (newError !== null) {
-          setError(newError);
-          return;
-        }
-        setResult(newResult);
-      }
+  const renderList = () => {
+    const pages = data.pages;
+    if (pages.reduce((partial, page) => partial + page.repos.length, 0) === 0 && !isFetchingNextPage) {
+      return (
+        <div>
+          <i>(Empty)</i>
+        </div>
+      );
     }
 
-    fetchAndUpdate();
-    return () => {
-      cancelled = true
-    };
-  }, [username]);
+    return (
+      <InView 
+        triggerOnce 
+        onChange={inView => {
+          if (hasNextPage && inView) {
+            fetchNextPage();
+          }
+        }}
+      >
+        {({ ref }) => (
+          <div>
+            <table>
+              <thead>
+                <tr>
+                  <th>Repository</th>
+                  <th>Stargazers Count</th>
+                </tr>
+              </thead>
+              <tbody>
+                {pages.map((page, i) => (
+                  <Fragment key={i}>
+                    {page.repos.map(
+                      (repo, j) => (
+                        <tr key={repo.name} ref={(i === pages.length - 1 && j === page.repos.length - 1) ? ref : null}>
+                          <td>
+                            <Link to={`/users/${username}/repos/${repo.name}`}>
+                              {repo.name}
+                            </Link>
+                          </td>
+                          <td>
+                            {repo.stargazers_count}
+                          </td>
+                        </tr>
+                      )
+                    )}
+                  </Fragment>
+                ))}
+              </tbody>
+            </table>
+            {isFetchingNextPage && 'Loading more...'}
+          </div>
+        )}
+      </InView>
+    );
+  }
+
   return (
     <div>
       <h1>
         Repository list of {username}
       </h1>
-      {renderList(username, error, result)}
+      {renderList()}
     </div>
   );
 }

@@ -1,17 +1,14 @@
-// TODO: paging, caching
-async function fetchRepoList(username) {
-  const response = await fetch(`https://api.github.com/users/${username}/repos`);
+async function fetchRepoList({queryKey, pageParam = 1}) {
+  const username = queryKey[1];
+  const response = await fetch(`https://api.github.com/users/${username}/repos?per_page=10&page=${pageParam}`);
   
   if (!response.ok) {
     const error = await response.json();
-    return {
-      name: null, 
-      error: error.message ?? 'Unknown error'
-    };
+    throw Error(error.message ?? 'Unknown error');
   }
   const data = await response.json();
   const cleanedData = data.map(({name, stargazers_count}) => ({name, stargazers_count}));
-  return {result: cleanedData, error: null};
+  return {repos: cleanedData};
 }
 
 function fetchRepoDescription(username, repo) {

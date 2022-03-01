@@ -24,7 +24,6 @@ jest.mock('./RepoList', () => {
 
 jest.mock('./RepoPage', () => {
   const FakeRepoPage = props => {
-    console.log('called with', props)
     const username = props.username;
     const repo = props.repo;
     return (
