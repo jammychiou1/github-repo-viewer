@@ -5,10 +5,10 @@ import { QueryClient, QueryClientProvider } from 'react-query';
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
+      // Failed fetches (e.g. a "Not Found" fetch) are not cached. Therefore, after a Not Found fetch, 
+      // even if stale time is Infinity, react-query will repeatedly call github API if refetch is triggered.
+      // This can cause unwanted API calls. (maybe treat "Not Found" as success in the future?)
       staleTime: Infinity,
-      refetchOnMount: false,
-      refetchOnReconnect: false,
-      refetchOnWindowFocus: false,
       retry: false 
     }
   }
