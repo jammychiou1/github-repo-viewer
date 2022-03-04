@@ -22,7 +22,7 @@ function RepoList(props) {
       }
       return pages.length + 1;
     },
-  })
+  });
 
   if (status === 'loading') {
     return (

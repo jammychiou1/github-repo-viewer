@@ -1,9 +1,9 @@
 import { render, screen, waitForElementToBeRemoved } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider, setLogger } from 'react-query';
-import { rest } from 'msw';
 import { setupServer } from 'msw/node';
 import { defaultFallbackInView } from 'react-intersection-observer';
+import { makeMswHandler, makeSampleRepoList } from './testHelper';
 
 import { RepoList } from './RepoList.js';
 
@@ -33,17 +33,8 @@ function mockAndRender(testingUsername, mockedDatabase) {
     }
   });
 
-  server.use(
-    rest.get('https://api.github.com/users/:username/repos', (req, res, ctx) => {
-      const page = req.url.searchParams.get('page') ?? 1;
-      const per_page = req.url.searchParams.get('per_page') ?? 30;
-      const { username } = req.params;
-      if (!(username in mockedDatabase)) {
-        return res(ctx.status(404), ctx.json({message: 'Not Found'}));
-      }
-      return res(ctx.json(mockedDatabase[username].slice((page - 1) * per_page, page * per_page)));
-    }),
-  );
+  server.use(...makeMswHandler(mockedDatabase));
+
   render(
     <QueryClientProvider client={queryClient}>
       <MemoryRouter>
@@ -53,13 +44,8 @@ function mockAndRender(testingUsername, mockedDatabase) {
   );
 }
 
-test('render 2 repos', async () => {
-  mockAndRender('alice', {
-    alice: [
-      {name: 'repo1', stargazers_count: 100},
-      {name: 'repo2', stargazers_count: 200}
-    ]
-  });
+test('render 2 repos with correct table', async () => {
+  mockAndRender('alice', {alice: makeSampleRepoList(2)});
   expect(screen.getByText(/Loading/i)).toBeInTheDocument();
 
   await screen.findByRole('table');
@@ -81,7 +67,7 @@ test('render 2 repos', async () => {
   expect(row2).toContainElement(stargazers2);
 });
 
-test('display empty when there are 0 repos', async () => {
+test('display `empty` when there are 0 repos', async () => {
   mockAndRender('alice', {alice: []});
   expect(screen.getByText(/Loading/i)).toBeInTheDocument();
 
@@ -89,15 +75,10 @@ test('display empty when there are 0 repos', async () => {
 });
 
 test('display loading message when loading next page (20 repos)', async () => {
-  const repos = [];
-  for (let i = 1; i <= 20; i++) {
-    repos.push({name: `repo${i}`, stargazers_count: i * 100});
-  }
-  mockAndRender('alice', {alice: repos});
+  mockAndRender('alice', {alice: makeSampleRepoList(20)});
   expect(screen.getByText(/Loading/i)).toBeInTheDocument();
 
   await screen.findByText(/^repo1$/i);
-  expect(screen.getByText(/^repo1$/i)).toBeInTheDocument();
   expect(screen.queryByText(/^repo11$/i)).not.toBeInTheDocument();
   expect(screen.getByText(/Loading more/i)).toBeInTheDocument();
 
@@ -108,11 +89,7 @@ test('display loading message when loading next page (20 repos)', async () => {
 });
 
 test('display loading message when loading next page (15 repos)', async () => {
-  const repos = [];
-  for (let i = 1; i <= 15; i++) {
-    repos.push({name: `repo${i}`, stargazers_count: i * 100});
-  }
-  mockAndRender('alice', {alice: repos});
+  mockAndRender('alice', {alice: makeSampleRepoList(15)});
   expect(screen.getByText(/Loading/i)).toBeInTheDocument();
 
   await screen.findByText(/^repo1$/i);
@@ -129,5 +106,3 @@ test('not found', async () => {
 
   await screen.findByText(/Not Found/i);
 });
-
-// test link

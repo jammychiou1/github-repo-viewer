@@ -37,61 +37,50 @@ jest.mock('./RepoPage', () => {
 
 test('route to homepage correctly', () => {
   renderWithHistory();
-  const home = screen.getByText(/home/i);
-  expect(home).toBeInTheDocument();
+  expect(screen.getByText(/home/i)).toBeInTheDocument();
 });
 
 test('route to repo list correctly', () => {
   renderWithHistory(['/users/alice/repos']);
-  const home = screen.getByText(/repo list of user alice/i);
-  expect(home).toBeInTheDocument();
+  expect(screen.getByText(/repo list of user alice/i)).toBeInTheDocument();
 });
 
 test('route to repo page correctly', () => {
   renderWithHistory(['/users/alice/repos/test-repo']);
-  const home = screen.getByText(/repo page test-repo of user alice/i);
-  expect(home).toBeInTheDocument();
+  expect(screen.getByText(/repo page test-repo of user alice/i)).toBeInTheDocument();
 });
-
-function checkUnknownURLMessage() {
-  const message = screen.getByText(/Unknown URL/i);
-  expect(message).toBeInTheDocument();
-}
 
 test('unknown url under app', () => {
   renderWithHistory(['/bad']);
-  checkUnknownURLMessage();
+  expect(screen.getByText(/Unknown URL/i)).toBeInTheDocument();
 });
 
 test('unknown url under users', () => {
   renderWithHistory(['/users']);
-  checkUnknownURLMessage();
+  expect(screen.getByText(/Unknown URL/i)).toBeInTheDocument();
 });
 
 test('unknown url under username parser', () => {
   renderWithHistory(['/users/alice/unknown']);
-  checkUnknownURLMessage();
+  expect(screen.getByText(/Unknown URL/i)).toBeInTheDocument();
 });
 
 test('unknown url under repos', () => {
   renderWithHistory(['/users/alice/repos/extra/depth']);
-  checkUnknownURLMessage();
+  expect(screen.getByText(/Unknown URL/i)).toBeInTheDocument();
 });
 
 test('invalid username (too long)', () => {
   renderWithHistory(['/users/usernametoooooooooooooooooolooooooooooooooooong']);
-  const home = screen.getByText(/Invalid username/i);
-  expect(home).toBeInTheDocument();
+  expect(screen.getByText(/Invalid username/i)).toBeInTheDocument();
 });
 
 test('invalid username (forbidden character)', () => {
   renderWithHistory(['/users/plussign+']);
-  const home = screen.getByText(/Invalid username/i);
-  expect(home).toBeInTheDocument();
+  expect(screen.getByText(/Invalid username/i)).toBeInTheDocument();
 });
 
 test('invalid repo name (forbidden character)', () => {
   renderWithHistory(['/users/alice/repos/plussign+']);
-  const home = screen.getByText(/Invalid repository name/i);
-  expect(home).toBeInTheDocument();
+  expect(screen.getByText(/Invalid repository name/i)).toBeInTheDocument();
 });
