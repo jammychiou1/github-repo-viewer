@@ -1,4 +1,4 @@
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Link } from 'react-router-dom';
 import { Users } from './UsersRouting';
 import { NoMatch } from './NoMatch';
 import { QueryClient, QueryClientProvider } from 'react-query';
@@ -17,7 +17,15 @@ const queryClient = new QueryClient({
 function Home() {
   return (
     <div>
-      home
+      <h1>Github Repository Viewer</h1>
+
+      <h2>List all repositories of a user</h2>
+      <div>{'Format: /users/{username}/repos'}</div>
+      <div>Example: <Link to="/users/jammychiou1/repos">/users/jammychiou1/repos</Link></div>
+
+      <h2>Inspect a specific repository</h2>
+      <div>{'Format: /users/{username}/repos/{repo}'}</div>
+      <div>Example: <Link to="/users/jammychiou1/repos/github-repo-viewer">/users/jammychiou1/repos/github-repo-viewer</Link></div>
     </div>
   );
 }
