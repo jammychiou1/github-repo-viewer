@@ -37,7 +37,7 @@ jest.mock('./RepoPage', () => {
 
 test('route to homepage correctly', () => {
   renderWithHistory();
-  expect(screen.getByText(/home/i)).toBeInTheDocument();
+  expect(screen.getByText(/Github Repository Viewer/i)).toBeInTheDocument();
 });
 
 test('route to repo list correctly', () => {
