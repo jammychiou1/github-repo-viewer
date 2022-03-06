@@ -1,6 +1,6 @@
 # Github Repository Viewer
-Deployed URL: https://github-repo-viewer-jammychiou1.netlify.app/
-啟動方式:
+- Deployed URL: https://github-repo-viewer-jammychiou1.netlify.app/
+- 啟動方式:
 ```={bash}
 git clone https://github.com/jammychiou1/github-repo-viewer.git
 cd github-repo-viewer
