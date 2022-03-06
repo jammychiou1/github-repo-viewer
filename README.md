@@ -25,7 +25,7 @@ yarn start
 
 ### App.js, ReposRouting.js, UsersRouting.js
 - 使用 React Router 來 parse URL 中的 username / repository name，並當作 props 來 render RepoList 或 RepoPage，也會過濾掉未知的 URL 或是不合法的 username / repository name。
-- 分成多個檔案的原因，主要是設想未來可能 users/ 底下或是 users/{username}/repos/ 底下會有更多的頁面，擔心如果放在同一份檔案的話未來可能會造成檔案太大不易讀，因此先行設計成獨立的檔案。
+- 分成多個檔案的原因，主要是設想未來可能 /users/ 底下或是 /users/{username}/repos/ 底下會有更多的頁面，擔心如果放在同一份檔案的話未來可能會造成檔案太大不易讀，因此先行設計成獨立的檔案。
 
 ### RepoList.js
 - 繪製 Repository 列表，並且利用 React Intersection Observer 中的 Inview Component 來偵測畫面是否捲動到最下面。
